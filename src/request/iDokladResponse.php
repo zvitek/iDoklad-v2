@@ -9,55 +9,55 @@ namespace malcanek\iDoklad\request;
 use malcanek\iDoklad\iDokladException;
 
 class iDokladResponse {
-    
+
     /**
      * Response code from iDoklad
      * @var int
      */
     private $code;
-    
+
     /**
      * Data returned from iDoklad
      * @var array
      */
     private $data;
-    
+
     /**
      * Headers returned from request
      * @var string
      */
     private $headers;
-    
+
     /**
      * Number of items returned. These items are in data var.
      * @var int
      */
     private $totalItems;
-    
+
     /**
      * Number of pages available
      * @var int
      */
     private $totalPages;
-    
+
     /**
      *
      * @var string
      */
     private $links;
-    
+
     /**
      *
      * @var string
      */
     private $type;
-    
+
     /**
      * JSON
      * @var string
      */
     private $raw;
-    
+
     /**
      * Stores return messages for codes
      * @var array
@@ -75,7 +75,7 @@ class iDokladResponse {
         500 => 'interní chyba serveru - v tomto případě kontaktujte naší technickou podporu',
         'no_text' => 'kód nemá přiřazen žádný text'
     );
-    
+
     /**
      * Initializes iDoklad response
      * @param string $rawOutput
@@ -86,20 +86,20 @@ class iDokladResponse {
         $this->code = $code;
         $this->headers = substr($rawOutput, 0, $headerSize);
         $this->raw = trim(substr($rawOutput, $headerSize));
-        
+
         if($httpException && $code >= 400){
             throw new iDokladException($this->getCodeText(), $code, $this->raw);
         }
-        
+
         if($code < 300){
             $parsed = $this->parseJSON($this->raw);
             $this->data = empty($parsed['Data']) ? $parsed : $parsed['Data'];
             $this->links = empty($parsed['Links']) ? null : $parsed['Links'];
-            $this->totalItems = empty($parsed['TotalItems']) ? null : $parsed['TotalItems'];
-            $this->totalPages = empty($parsed['TotalPages']) ? null : $parsed['TotalPages'];
+	        $this->totalItems = empty($parsed['Data']['TotalItems']) ? null : $parsed['Data']['TotalItems'];
+	        $this->totalPages = empty($parsed['Data']['TotalPages']) ? null : $parsed['Data']['TotalPages'];
         }
     }
-    
+
     /**
      * Returns response code
      * @return int
@@ -107,7 +107,7 @@ class iDokladResponse {
     public function getCode(){
         return $this->code;
     }
-    
+
     /**
      * Returns response code text in czech
      * @return string
@@ -115,7 +115,7 @@ class iDokladResponse {
     public function getCodeText(){
         return (isset($this->codesCZ[$this->code]) ? $this->codesCZ[$this->code] : $this->codesCZ['no_text']);
     }
-    
+
     /**
      * Returns parsed response data
      * @return array
@@ -123,7 +123,7 @@ class iDokladResponse {
     public function getData(){
         return $this->data;
     }
-    
+
     /**
      * Returns total items returned in request
      * @return int
@@ -131,7 +131,7 @@ class iDokladResponse {
     public function getTotalItems(){
         return $this->totalItems;
     }
-    
+
     /**
      * Returns total pages that are possible to return in requests
      * @return int
@@ -139,15 +139,15 @@ class iDokladResponse {
     public function getTotalPages(){
         return $this->totalPages;
     }
-    
+
     /**
-     * 
-     * @return 
+     *
+     * @return
      */
     public function getLink(){
         return $this->links;
     }
-    
+
     /**
      * Sets response type e.g. IssuedInvoice
      * @param string $type
@@ -155,7 +155,7 @@ class iDokladResponse {
     public function setType($type){
         $this->type = $type;
     }
-    
+
     /**
      * Returns response type e.g. IssuedInvoice
      * @return string
@@ -163,7 +163,7 @@ class iDokladResponse {
     public function getType(){
         return $this->type;
     }
-    
+
     /**
      * Validates if response is some kind of type e.g. IssuedInvoice
      * @param string $type
@@ -172,7 +172,7 @@ class iDokladResponse {
     public function is($type){
         return $this->type == $type;
     }
-    
+
     /**
      * Get raw response from iDoklad
      * @return string
@@ -180,7 +180,7 @@ class iDokladResponse {
     public function getRaw() {
         return $this->raw;
     }
-    
+
     /**
      * Parses json string
      * @param string $json
@@ -206,5 +206,5 @@ class iDokladResponse {
         }
         return $parsed;
     }
-    
+
 }
